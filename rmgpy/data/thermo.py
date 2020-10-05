@@ -846,6 +846,9 @@ class ThermoDatabase(object):
         }
         self.global_context = {}
 
+        # Catalyst properties
+        self.set_binding_energies()
+
     def __reduce__(self):
         """
         A helper function used when pickling a ThermoDatabase object.
