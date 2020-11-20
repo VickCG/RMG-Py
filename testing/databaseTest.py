@@ -401,9 +401,9 @@ class TestDatabase(object):  # cannot inherit from unittest.TestCase if we want 
             assert isinstance(entry.surface_site_density, ScalarQuantity)
             if not isinstance(entry.surface_site_density.value, float):
                 raise TypeError('Entry {} should be a float, but is type {}'.format(entry.label, type(entry.surface_site_density.value)))
+            assert 1e-8 > entry.surface_site_density.value > 1e-10  # values should be reasonable
             if not isinstance(entry.surface_site_density.units, str):
                 raise TypeError('Entry {} should be a str, but is type {}'.format(entry.label, type(entry.surface_site_density.units)))
-            assert 1e-4 > entry.surface_site_density.value_si > 1e-6  # values should be reasonable
 
     def general_check_metal_database_has_reasonable_labels(self, library):
         """Test that each entry has a reasonable label corresponding to its metal and facet"""
