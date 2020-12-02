@@ -1558,10 +1558,24 @@ class ThermoDatabase(object):
             else:
                 logging.debug("After removing from surface:\n" + dummy_molecule.to_adjacency_list())
 
-        dummy_species = Species()
-        dummy_species.molecule = dummy_molecules
-        dummy_species.generate_resonance_structures()
-        thermo = self.get_thermo_data(dummy_species)
+        if len(dummy_molecules) == 0:
+            raise RuntimeError(f"Cannot get thermo for gas-phase molecule. No valid dummy molecules from original molecule:\n{molecule.to_adjacency_list()}")
+
+        
+        # if len(molecule) > 1, it will assume all resonance structures have already been generated when it tries to generate them, so evaluate each configuration separately and pick the lowest energy one by H298 value
+        thermo_models = []
+        for dummy_molecule in dummy_molecules:
+            dummy_species = Species()
+            dummy_species.molecule = [dummy_molecule]
+            dummy_species.generate_resonance_structures()
+            thermo = self.get_thermo_data(dummy_species)
+            thermo_models.append(thermo)
+            
+        # define the comparison function to find the lowest energy
+        def lowest_energy(thermo_model):
+            return thermo_model.H298.value
+
+        thermo = min(thermo_models, key=lowest_energy)
 
         thermo.comment = "Gas phase thermo from {0}. Adsorption correction:".format(thermo.comment)
         logging.debug("Using thermo from gas phase for species {}\n".format(species.label) + repr(thermo))
