@@ -809,6 +809,9 @@ multiplicity 2
         self.assertEqual(set(initial), set(spec.molecule))
         self.assertTrue('Adsorption correction' in thermo.comment,
                         'Adsorption correction not added to thermo.')
+        match_str = 'Gas phase thermo for ON=[N]'
+        self.assertEqual(thermo.comment[0:len(match_str)], match_str,
+                         'Gas phase species in thermo.comment should be ON=[N]')
 
 
     def test_adsorbate_thermo_generation_bidentate_OO(self):
@@ -830,6 +833,30 @@ multiplicity 2
         self.assertEqual(set(initial), set(spec.molecule))
         self.assertTrue('Adsorption correction' in thermo.comment,
                         'Adsorption correction not added to thermo.')
+        self.assertEqual(thermo.label, 'O2XX', 'thermo.label should be O2XX')
+
+
+    def test_adsorbate_thermo_generation_bidentate_CO(self):
+        """Test thermo generation for a bidentate adsorbate, [X][C-]=[O+][X]
+
+        C- = O+
+        |    |
+        X    X
+        """
+        spec = Species(molecule=[Molecule().from_adjacency_list("""
+[Pt][C-]=[O+][Pt]
+1 O u0 p1 c+1 {2,D} {4,S}
+2 C u0 p1 c-1 {1,D} {3,S}
+3 X u0 p0 c0 {2,S}
+4 X u0 p0 c0 {1,S}""")])
+        spec.generate_resonance_structures()
+        initial = list(spec.molecule)  # Make a copy of the list
+        thermo = self.database.get_thermo_data(spec)
+        self.assertEqual(len(initial), len(spec.molecule))
+        self.assertEqual(set(initial), set(spec.molecule))
+        self.assertTrue('Adsorption correction' in thermo.comment,
+                        'Adsorption correction not added to thermo.')
+        self.assertEqual(thermo.label, 'COXX', 'thermo.label should be COXX')
 
 
     def test_adsorbate_thermo_raises_error(self):
